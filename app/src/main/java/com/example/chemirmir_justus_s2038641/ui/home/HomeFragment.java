@@ -135,25 +135,62 @@ public class HomeFragment extends Fragment {
                         public void run() {
                             // display the fetched data
                             if (data.length() > 0) {
+
                                 TextView featuredLocationNumber = root.findViewById(R.id.text_location_count);
-                                featuredLocationNumber.setText(String.format("Featured location %d of 6", position));
                                 TextView featuredLocation = root.findViewById(R.id.text_location);
-                                featuredLocation.setText(String.format("%s, %s", name, country));
                                 TextView weatherDesc = root.findViewById(R.id.text_weather_desc);
                                 TextView date = root.findViewById(R.id.text_day_time);
                                 TextView update = root.findViewById(R.id.text_update);
+                                TextView maxTemp = root.findViewById(R.id.text_temperature_max_value);
+                                TextView minTemp = root.findViewById(R.id.text_temperature_min_value);
+                                TextView windSpeedValue = root.findViewById(R.id.text_wind_speed_value);
+                                TextView windDirectionValue = root.findViewById(R.id.text_wind_direction_value);
+                                TextView uvRiskValue = root.findViewById(R.id.text_uv_risk_value);
+                                TextView pollutionValue = root.findViewById(R.id.text_pollution_value);
+                                TextView sunriseValue = root.findViewById(R.id.text_sunrise_value);
+                                TextView sunsetValue = root.findViewById(R.id.text_sunset_value);
+                                TextView humidityValue = root.findViewById(R.id.text_humidity_value);
+                                TextView pressureValue = root.findViewById(R.id.text_pressure_value);
+                                TextView visibilityValue = root.findViewById(R.id.text_visibility_value);
+                                TextView coordinatesValue = root.findViewById(R.id.text_coordinates_value);
+
+                                featuredLocationNumber.setText(String.format("Featured location %d of 6", position));
+                                featuredLocation.setText(String.format("%s, %s", name, country));
+
                                 for (Forecast f : forecast) {
                                     if(f.getDay() == selectedForecastDay) {
+
                                         String weatherCondition = extractWeatherCondition(f.getTitle());
-                                        weatherDesc.setText(weatherCondition);
                                         String[] dateTime = extractDateTime(f.getPubDate());
-                                        date.setText(dateTime[0]);
+                                        String maxTemperature = extractValueByKey(f.getDescription(), "Maximum Temperature");
+                                        String minTemperature = extractValueByKey(f.getDescription(), "Minimum Temperature");
+                                        String windDirection = extractValueByKey(f.getDescription(), "Wind Direction");
+                                        String windSpeed = extractValueByKey(f.getDescription(), "Wind Speed");
+                                        String visibility = extractValueByKey(f.getDescription(), "Visibility");
+                                        String pressure = extractValueByKey(f.getDescription(), "Pressure");
+                                        String humidity = extractValueByKey(f.getDescription(), "Humidity");
+                                        String uvRisk = extractValueByKey(f.getDescription(), "UV Risk");
+                                        String pollution = extractValueByKey(f.getDescription(), "Pollution");
+                                        String sunrise = extractValueByKey(f.getDescription(), "Sunrise");
+                                        String sunset = extractValueByKey(f.getDescription(), "Sunset");
+                                        String coordinates = extractCoordinates(f.getGeoLocation());
+
                                         update.setText(String.format("Last update: %s", dateTime[1]));
+                                        date.setText(dateTime[0]);
+                                        weatherDesc.setText(weatherCondition);
+                                        maxTemp.setText(maxTemperature);
+                                        minTemp.setText(minTemperature);
+                                        windDirectionValue.setText(windDirection);
+                                        windSpeedValue.setText(windSpeed);
+                                        visibilityValue.setText(visibility);
+                                        pressureValue.setText(pressure);
+                                        humidityValue.setText(humidity);
+                                        uvRiskValue.setText(uvRisk);
+                                        pollutionValue.setText(pollution);
+                                        sunriseValue.setText(sunrise);
+                                        sunsetValue.setText(sunset);
+                                        coordinatesValue.setText(coordinates);
 
-
-                                        Log.d("FORECAST", "Description: " + f.getDescription());
-                                        Log.d("FORECAST", "GeoLocation: " + f.getGeoLocation());
-                                        Log.d("FORECAST", "-------------------");
                                         return;
                                     }
 
@@ -322,6 +359,48 @@ public class HomeFragment extends Fragment {
             return new String[]{"", ""};
         }
     }
+
+    // method to extract weather element value from the data string
+    private String extractValueByKey(String data, String key) {
+        // split the string by commas
+        String[] parts = data.split(",");
+        // loop through the parts to find the key-value pair
+        for (String part : parts) {
+            // split the part by ":" to separate key and value
+            String[] keyValue = part.split(":");
+            // sunrise and sunset have different formatting
+            if(keyValue.length == 3 && keyValue[0].trim().equals(key)) {
+                return keyValue[1].trim() + ":" + keyValue[2].trim();
+            }
+            // if the key matches, return the value (trimmed)
+            if (keyValue.length == 2 && keyValue[0].trim().equals(key)) {
+                return keyValue[1].trim();
+            }
+        }
+        // if the key is not found, return "N/A"
+        return "N/A";
+    }
+
+    // method to extract coordinates from the data string
+    private String extractCoordinates(String coordinates) {
+        // split the string by space to separate latitude and longitude
+        String[] parts = coordinates.split(" ");
+        if (parts.length == 2) {
+            // extract latitude and longitude
+            String latitude = parts[0];
+            String longitude = parts[1];
+
+            // append degree symbol and direction to latitude and longitude
+            String formattedCoordinates = Math.abs(Double.parseDouble(latitude)) + "°" + (Double.parseDouble(latitude) < 0 ? "S, " : "N, ") +
+                    Math.abs(Double.parseDouble(longitude)) + "°" + (Double.parseDouble(longitude) < 0 ? "W" : "E");
+
+            return formattedCoordinates;
+        } else {
+            return "N/A";
+        }
+    }
+
+
 
 
 
