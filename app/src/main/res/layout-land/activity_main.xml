@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/scrollview_1"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/warm_background">
+    android:background="@drawable/warm_background"
+    android:scrollbars="none">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -15,7 +17,7 @@
             android:layout_height="wrap_content"
             android:paddingLeft="10dp"
             android:paddingTop="10dp"
-            android:text="fgfdgfdfdgfdg"
+            android:text=""
             android:textColor="@color/white"
             android:textSize="11sp" />
 
@@ -123,6 +125,7 @@
             android:textSize="16sp" />
 
         <LinearLayout
+            android:id="@+id/linear_layout_3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/text_day_forecast"
@@ -141,7 +144,8 @@
                     android:layout_height="30dp"
                     android:layout_marginBottom="15dp"
                     android:rotation="270"
-                    android:src="@drawable/next" />
+                    android:src="@drawable/next"
+                    android:visibility="invisible" />
 
                 <ImageView
                     android:id="@+id/next_button_forecast"
@@ -153,24 +157,15 @@
 
             </LinearLayout>
 
-            <!--            <LinearLayout-->
-            <!--                android:id="@+id/linear_layout_3"-->
-            <!--                android:layout_width="match_parent"-->
-            <!--                android:layout_height="wrap_content"-->
-            <!--                android:layout_weight="5"-->
-            <!--                android:gravity="center_vertical"-->
-            <!--                android:orientation="vertical">-->
-
-
-            <!--            </LinearLayout>-->
-
             <HorizontalScrollView
                 android:id="@+id/horizontal_scroll_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="15dp"
                 android:layout_marginTop="10dp"
-                android:padding="10dp">
+                android:layout_marginBottom="50dp"
+                android:padding="10dp"
+                android:scrollbars="none">
 
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -188,13 +183,12 @@
                             android:id="@+id/card_view"
                             android:layout_width="40dp"
                             android:layout_height="40dp"
-                            android:layout_alignParentEnd="true"
                             android:layout_gravity="center"
                             android:layout_marginStart="16dp"
                             android:layout_marginTop="16dp"
                             android:layout_marginEnd="16dp"
                             android:layout_marginBottom="16dp"
-                            app:cardCornerRadius="40dp">
+                            app:cardCornerRadius="20dp">
 
                             <ImageView
                                 android:id="@+id/image_weather"
@@ -258,7 +252,7 @@
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:layout_marginVertical="10dp"
-                                    android:text="dsfgfdsg"
+                                    android:text=""
                                     android:textColor="@color/white"
                                     android:textSize="13sp" />
 
@@ -267,7 +261,7 @@
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:layout_marginTop="5dp"
-                                    android:text="5"
+                                    android:text=""
                                     android:textColor="@color/white"
                                     android:textSize="13sp" />
                             </LinearLayout>
@@ -336,7 +330,7 @@
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
                                         android:layout_marginTop="10dp"
-                                        android:text="25°C"
+                                        android:text=""
                                         android:textColor="@color/white"
                                         android:textSize="13sp" />
 
@@ -345,7 +339,7 @@
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
                                         android:layout_marginTop="5dp"
-                                        android:text="12°C"
+                                        android:text=""
                                         android:textColor="@color/white"
                                         android:textSize="13sp" />
                                 </LinearLayout>
@@ -373,7 +367,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="10dp"
-                                android:text="Low"
+                                android:text=""
                                 android:textColor="@color/white"
                                 android:textSize="13sp" />
                         </LinearLayout>
@@ -399,7 +393,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="10dp"
-                                android:text="73%"
+                                android:text=""
                                 android:textColor="@color/white"
                                 android:textSize="13sp" />
                         </LinearLayout>
@@ -465,7 +459,7 @@
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
                                         android:layout_marginTop="10dp"
-                                        android:text="6mph"
+                                        android:text=""
                                         android:textColor="@color/white"
                                         android:textSize="13sp" />
 
@@ -474,7 +468,7 @@
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
                                         android:layout_marginTop="5dp"
-                                        android:text="Northerly"
+                                        android:text=""
                                         android:textColor="@color/white"
                                         android:textSize="13sp" />
                                 </LinearLayout>
@@ -501,7 +495,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="10dp"
-                                android:text="05:37 BST"
+                                android:text=""
                                 android:textColor="@color/white"
                                 android:textSize="13sp" />
                         </LinearLayout>
@@ -526,7 +520,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="10dp"
-                                android:text="20:36 BST"
+                                android:text=""
                                 android:textColor="@color/white"
                                 android:textSize="13sp" />
                         </LinearLayout>
@@ -561,7 +555,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="10dp"
-                                android:text="1009mb"
+                                android:text=""
                                 android:textColor="@color/white"
                                 android:textSize="13sp" />
                         </LinearLayout>
@@ -586,7 +580,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="10dp"
-                                android:text="Moderate"
+                                android:text=""
                                 android:textColor="@color/white"
                                 android:textSize="13sp" />
                         </LinearLayout>
@@ -611,7 +605,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="10dp"
-                                android:text="53.4809°N, 2.2374°W"
+                                android:text=""
                                 android:textColor="@color/white"
                                 android:textSize="13sp" />
                         </LinearLayout>
@@ -619,6 +613,28 @@
                     </LinearLayout>
                 </LinearLayout>
             </HorizontalScrollView>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/search_city"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/linear_layout_3"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="30dp"
+            android:background="@drawable/glass_background"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Select to search available cities"
+                android:textColor="@color/white"
+
+                android:textSize="15sp" />
+
+
         </LinearLayout>
 
 
