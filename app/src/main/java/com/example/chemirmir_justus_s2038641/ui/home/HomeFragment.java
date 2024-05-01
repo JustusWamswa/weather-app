@@ -1,10 +1,17 @@
 package com.example.chemirmir_justus_s2038641.ui.home;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -21,10 +28,18 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class HomeFragment extends Fragment {
 
@@ -34,7 +49,7 @@ public class HomeFragment extends Fragment {
     private List<Latest> latest = new ArrayList<>();
     private View root;
     private int selectedForecastDay = 1;
-
+    private int selectedCityIndex = 0;
 
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -44,6 +59,11 @@ public class HomeFragment extends Fragment {
 
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         root = binding.getRoot();
+
+        ImageButton prevButton = root.findViewById(R.id.prev_button);
+        ImageButton nextButton = root.findViewById(R.id.next_button);
+        ImageView prevForecast = root.findViewById(R.id.prev_button_forecast);
+        ImageView nextForecast = root.findViewById(R.id.next_button_forecast);
 
         // creating a list of cities
         cities = new ArrayList<>();
@@ -56,20 +76,91 @@ public class HomeFragment extends Fragment {
 
         // trigger network request to get the first city
         if (!cities.isEmpty()) {
-            City city = cities.get(0);
-            int position = city.getPosition();
-            int id = city.getId();
-            String name = city.getName();
-            String country = city.getCountry();
-            fetchForecastData(position, id, name, country);
-            fetchLatestData(id);
+            updateCityData();
         }
+
+
+        prevButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                animateButton(v);
+
+                selectedCityIndex--;
+                if (selectedCityIndex < 0) {
+                    selectedCityIndex = cities.size() - 1;
+                }
+                updateCityData();
+            }
+        });
+        nextButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                animateButton(v);
+
+                selectedCityIndex++;
+                if (selectedCityIndex >= cities.size()) {
+                    selectedCityIndex = 0;
+                }
+                updateCityData();
+            }
+        });
+        prevForecast.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                animateButton(v);
+                if (selectedForecastDay > 1) {
+                    selectedForecastDay--;
+                    setViewValues();
+                    nextForecast.setVisibility(View.VISIBLE);
+                } else {
+                    prevForecast.setVisibility(View.INVISIBLE);
+                }
+            }
+        });
+        nextForecast.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                animateButton(v);
+                if (selectedForecastDay < 3) {
+                    selectedForecastDay++;
+                    setViewValues();
+                    prevForecast.setVisibility(View.VISIBLE);
+                } else {
+                    nextForecast.setVisibility(View.INVISIBLE);
+                }
+            }
+        });
+
 
         return root;
     }
 
+    // method to update data of the selected city
+    private void updateCityData() {
+        City city = cities.get(selectedCityIndex);
+        int position = city.getPosition();
+        int id = city.getId();
+        String name = city.getName();
+        String country = city.getCountry();
+        fetchForecastData(position, id, name, country);
+    }
+
+    // method to apply animation to the button
+    private void animateButton(View v) {
+        // Apply scale animation
+        Animation scaleAnimation = AnimationUtils.loadAnimation(getContext(), R.anim.scale_anim);
+        v.startAnimation(scaleAnimation);
+
+        // Apply alpha animation
+        Animation alphaAnimation = AnimationUtils.loadAnimation(getContext(), R.anim.alpha_anim);
+        v.startAnimation(alphaAnimation);
+    }
+
     private void fetchForecastData(int position, int id, String name, String country) {
         showLoader();
+        forecast.clear();
+        selectedForecastDay = 1;
+
         // set the url to have the given id
         String urlString = "https://weather-broker-cdn.api.bbci.co.uk/en/forecast/rss/3day/" + id;
 
@@ -86,16 +177,31 @@ public class HomeFragment extends Fragment {
                     int eventType = parser.getEventType();
                     StringBuilder data = new StringBuilder();
                     int day = 1;
+                    String imageUrl = "";
+                    String title = "";
+                    String description = "";
+                    String pubDate = "";
+                    String geoLocation = "";
 
                     while (eventType != XmlPullParser.END_DOCUMENT) {
                         String tagName = parser.getName();
                         switch (eventType) {
                             case XmlPullParser.START_TAG:
+                                if (tagName.equalsIgnoreCase(("image"))) {
+
+                                    while (!(eventType == XmlPullParser.END_TAG && tagName.equalsIgnoreCase("image"))) {
+                                        if (eventType == XmlPullParser.START_TAG) {
+                                            if (tagName.equalsIgnoreCase("url")) {
+                                                imageUrl = parser.nextText().trim();
+                                                Log.d("IMAGE", "Url: " + imageUrl);
+                                                getImageSrc(imageUrl);
+                                            }
+                                        }
+                                        eventType = parser.next();
+                                        tagName = parser.getName();
+                                    }
+                                }
                                 if (tagName.equalsIgnoreCase(("item"))) {
-                                    String title = "";
-                                    String description = "";
-                                    String pubDate = "";
-                                    String geoLocation = "";
 
                                     while (!(eventType == XmlPullParser.END_TAG && tagName.equalsIgnoreCase("item"))) {
                                         if (eventType == XmlPullParser.START_TAG) {
@@ -118,7 +224,6 @@ public class HomeFragment extends Fragment {
                                             .append(pubDate).append("\n")
                                             .append(geoLocation).append("\n\n");
 
-
                                     forecast.add(new Forecast(day, title, description, pubDate, geoLocation));
 
                                     day += 1;
@@ -135,72 +240,19 @@ public class HomeFragment extends Fragment {
                         public void run() {
                             // display the fetched data
                             if (data.length() > 0) {
-
                                 TextView featuredLocationNumber = root.findViewById(R.id.text_location_count);
                                 TextView featuredLocation = root.findViewById(R.id.text_location);
-                                TextView weatherDesc = root.findViewById(R.id.text_weather_desc);
-                                TextView date = root.findViewById(R.id.text_day_time);
-                                TextView update = root.findViewById(R.id.text_update);
-                                TextView maxTemp = root.findViewById(R.id.text_temperature_max_value);
-                                TextView minTemp = root.findViewById(R.id.text_temperature_min_value);
-                                TextView windSpeedValue = root.findViewById(R.id.text_wind_speed_value);
-                                TextView windDirectionValue = root.findViewById(R.id.text_wind_direction_value);
-                                TextView uvRiskValue = root.findViewById(R.id.text_uv_risk_value);
-                                TextView pollutionValue = root.findViewById(R.id.text_pollution_value);
-                                TextView sunriseValue = root.findViewById(R.id.text_sunrise_value);
-                                TextView sunsetValue = root.findViewById(R.id.text_sunset_value);
-                                TextView humidityValue = root.findViewById(R.id.text_humidity_value);
-                                TextView pressureValue = root.findViewById(R.id.text_pressure_value);
-                                TextView visibilityValue = root.findViewById(R.id.text_visibility_value);
-                                TextView coordinatesValue = root.findViewById(R.id.text_coordinates_value);
 
                                 featuredLocationNumber.setText(String.format("Featured location %d of 6", position));
                                 featuredLocation.setText(String.format("%s, %s", name, country));
 
-                                for (Forecast f : forecast) {
-                                    if(f.getDay() == selectedForecastDay) {
-
-                                        String weatherCondition = extractWeatherCondition(f.getTitle());
-                                        String[] dateTime = extractDateTime(f.getPubDate());
-                                        String maxTemperature = extractValueByKey(f.getDescription(), "Maximum Temperature");
-                                        String minTemperature = extractValueByKey(f.getDescription(), "Minimum Temperature");
-                                        String windDirection = extractValueByKey(f.getDescription(), "Wind Direction");
-                                        String windSpeed = extractValueByKey(f.getDescription(), "Wind Speed");
-                                        String visibility = extractValueByKey(f.getDescription(), "Visibility");
-                                        String pressure = extractValueByKey(f.getDescription(), "Pressure");
-                                        String humidity = extractValueByKey(f.getDescription(), "Humidity");
-                                        String uvRisk = extractValueByKey(f.getDescription(), "UV Risk");
-                                        String pollution = extractValueByKey(f.getDescription(), "Pollution");
-                                        String sunrise = extractValueByKey(f.getDescription(), "Sunrise");
-                                        String sunset = extractValueByKey(f.getDescription(), "Sunset");
-                                        String coordinates = extractCoordinates(f.getGeoLocation());
-
-                                        update.setText(String.format("Last update: %s", dateTime[1]));
-                                        date.setText(dateTime[0]);
-                                        weatherDesc.setText(weatherCondition);
-                                        maxTemp.setText(maxTemperature);
-                                        minTemp.setText(minTemperature);
-                                        windDirectionValue.setText(windDirection);
-                                        windSpeedValue.setText(windSpeed);
-                                        visibilityValue.setText(visibility);
-                                        pressureValue.setText(pressure);
-                                        humidityValue.setText(humidity);
-                                        uvRiskValue.setText(uvRisk);
-                                        pollutionValue.setText(pollution);
-                                        sunriseValue.setText(sunrise);
-                                        sunsetValue.setText(sunset);
-                                        coordinatesValue.setText(coordinates);
-
-                                        return;
-                                    }
-
-                                }
+                                setViewValues();
+                                fetchLatestData(id);
 
                             } else {
                                 Toast.makeText(getActivity(), "Failed to fetch data!", Toast.LENGTH_LONG).show();
+                                hideLoader();
                             }
-
-                            hideLoader();
 
                             // Log the values of the forecast list
                             for (Forecast f : forecast) {
@@ -234,8 +286,78 @@ public class HomeFragment extends Fragment {
 
     }
 
+    private void setViewValues() {
+        for (Forecast f : forecast) {
+            if (f.getDay() == selectedForecastDay) {
+
+                TextView weatherDesc = root.findViewById(R.id.text_weather_desc);
+                TextView date = root.findViewById(R.id.text_day_time);
+                TextView update = root.findViewById(R.id.text_update);
+                TextView maxTemp = root.findViewById(R.id.text_temperature_max_value);
+                TextView minTemp = root.findViewById(R.id.text_temperature_min_value);
+                TextView windSpeedValue = root.findViewById(R.id.text_wind_speed_value);
+                TextView windDirectionValue = root.findViewById(R.id.text_wind_direction_value);
+                TextView uvRiskValue = root.findViewById(R.id.text_uv_risk_value);
+                TextView pollutionValue = root.findViewById(R.id.text_pollution_value);
+                TextView sunriseValue = root.findViewById(R.id.text_sunrise_value);
+                TextView sunsetValue = root.findViewById(R.id.text_sunset_value);
+                TextView humidityValue = root.findViewById(R.id.text_humidity_value);
+                TextView pressureValue = root.findViewById(R.id.text_pressure_value);
+                TextView visibilityValue = root.findViewById(R.id.text_visibility_value);
+                TextView coordinatesValue = root.findViewById(R.id.text_coordinates_value);
+
+                String weatherCondition = extractWeatherCondition(f.getTitle());
+                String[] dateTime = extractDateTime(f.getPubDate());
+                String maxTemperature = extractValueByKey(f.getDescription(), "Maximum Temperature");
+                String minTemperature = extractValueByKey(f.getDescription(), "Minimum Temperature");
+                String windDirection = extractValueByKey(f.getDescription(), "Wind Direction");
+                String windSpeed = extractValueByKey(f.getDescription(), "Wind Speed");
+                String visibility = extractValueByKey(f.getDescription(), "Visibility");
+                String pressure = extractValueByKey(f.getDescription(), "Pressure");
+                String humidity = extractValueByKey(f.getDescription(), "Humidity");
+                String uvRisk = extractValueByKey(f.getDescription(), "UV Risk");
+                String pollution = extractValueByKey(f.getDescription(), "Pollution");
+                String sunrise = extractValueByKey(f.getDescription(), "Sunrise");
+                String sunset = extractValueByKey(f.getDescription(), "Sunset");
+                String coordinates = extractCoordinates(f.getGeoLocation());
+
+                update.setText(String.format("Last update: %s", dateTime[1]));
+
+                SimpleDateFormat inputFormatter = new SimpleDateFormat("EEE, dd MMMM yyyy", Locale.ENGLISH);
+                Date initialDate = null;
+                try {
+                    initialDate = inputFormatter.parse(dateTime[0]);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                    return;
+                }
+                long initialTime = initialDate.getTime();
+                long oneDayMillis = 24 * 60 * 60 * 1000;
+                long nextDayTime = initialTime + oneDayMillis * (selectedForecastDay - 1);
+                Date nextDayDate = new Date(nextDayTime);
+                String nextDayString = inputFormatter.format(nextDayDate);
+
+                date.setText(nextDayString);
+                weatherDesc.setText(weatherCondition);
+                maxTemp.setText(maxTemperature);
+                minTemp.setText(minTemperature);
+                windDirectionValue.setText(windDirection);
+                windSpeedValue.setText(windSpeed);
+                visibilityValue.setText(visibility);
+                pressureValue.setText(pressure);
+                humidityValue.setText(humidity);
+                uvRiskValue.setText(uvRisk);
+                pollutionValue.setText(pollution);
+                sunriseValue.setText(sunrise);
+                sunsetValue.setText(sunset);
+                coordinatesValue.setText(coordinates);
+
+            }
+
+        }
+    }
+
     private void fetchLatestData(int id) {
-        showLoader();
         // set the url to have the given id
         String urlString = "https://weather-broker-cdn.api.bbci.co.uk/en/observation/rss/" + id;
 
@@ -271,7 +393,6 @@ public class HomeFragment extends Fragment {
 
                                     data.append(description).append("\n");
 
-
                                     latest.add(new Latest(description));
 
                                 }
@@ -293,7 +414,6 @@ public class HomeFragment extends Fragment {
                             } else {
                                 Toast.makeText(getActivity(), "Failed to fetch data!", Toast.LENGTH_LONG).show();
                             }
-
                             hideLoader();
                         }
                     });
@@ -304,6 +424,53 @@ public class HomeFragment extends Fragment {
         }).start();
 
 
+    }
+
+    // method to get image bitmap and remove background
+    private void getImageSrc(String imageUrl) {
+        ImageView imageView = root.findViewById(R.id.image_weather);
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    // create URL object
+                    URL url = new URL(imageUrl);
+
+                    // open connection
+                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                    connection.connect();
+
+                    // check if connection is successful
+                    if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                        // get input stream
+                        InputStream inputStream = connection.getInputStream();
+
+                        // decode the input stream into a Bitmap
+                        Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+
+                        // Update UI on the main thread
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                // Set the Bitmap as the image source of the ImageView
+                                imageView.setImageBitmap(bitmap);
+                            }
+                        });
+
+                        // Close input stream
+                        inputStream.close();
+                    } else {
+                        Log.e("ImageLoader", "Failed to load image: " + connection.getResponseCode());
+                    }
+
+                    // Disconnect connection
+                    connection.disconnect();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
 
     // method to extract temperature value from the data string
@@ -369,7 +536,7 @@ public class HomeFragment extends Fragment {
             // split the part by ":" to separate key and value
             String[] keyValue = part.split(":");
             // sunrise and sunset have different formatting
-            if(keyValue.length == 3 && keyValue[0].trim().equals(key)) {
+            if (keyValue.length == 3 && keyValue[0].trim().equals(key)) {
                 return keyValue[1].trim() + ":" + keyValue[2].trim();
             }
             // if the key matches, return the value (trimmed)
@@ -401,9 +568,6 @@ public class HomeFragment extends Fragment {
     }
 
 
-
-
-
     // Method to show loader
     private void showLoader() {
         ProgressBar progressBar = root.findViewById(R.id.progress_bar);
@@ -430,7 +594,7 @@ public class HomeFragment extends Fragment {
         private String name;
         private String country;
 
-        public City (int position, int id, String name, String country) {
+        public City(int position, int id, String name, String country) {
             this.position = position;
             this.id = id;
             this.name = name;
@@ -440,12 +604,15 @@ public class HomeFragment extends Fragment {
         public int getPosition() {
             return position;
         }
+
         public int getId() {
             return id;
         }
+
         public String getName() {
             return name;
         }
+
         public String getCountry() {
             return country;
         }
@@ -459,7 +626,7 @@ public class HomeFragment extends Fragment {
         private String pubDate;
         private String geoLocation;
 
-        public  Forecast (int day, String title, String description, String pubDate, String geoLocation) {
+        public Forecast(int day, String title, String description, String pubDate, String geoLocation) {
             this.day = day;
             this.title = title;
             this.description = description;
@@ -486,13 +653,14 @@ public class HomeFragment extends Fragment {
         public String getGeoLocation() {
             return geoLocation;
         }
+
     }
 
     // class representing latest weather
     private static class Latest {
         private String description;
 
-        public  Latest (String description) {
+        public Latest(String description) {
             this.description = description;
         }
 
