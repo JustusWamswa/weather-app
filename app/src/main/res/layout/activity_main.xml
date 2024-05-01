@@ -44,6 +44,18 @@
             android:textSize="80sp" />
 
         <TextView
+            android:id="@+id/text_fahrenheit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/text_update"
+            android:layout_toRightOf="@id/text_temperature"
+            android:layout_centerInParent="true"
+            android:layout_marginTop="90dp"
+            android:text=""
+            android:textColor="@color/white"
+            android:textSize="30sp" />
+
+        <TextView
             android:id="@+id/text_location_count"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

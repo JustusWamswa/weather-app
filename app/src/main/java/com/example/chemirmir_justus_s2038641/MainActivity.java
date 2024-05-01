@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -57,6 +58,14 @@ public class MainActivity extends AppCompatActivity {
         ImageView prevForecast = findViewById(R.id.prev_button_forecast);
         ImageView nextForecast = findViewById(R.id.next_button_forecast);
         LinearLayout search = findViewById(R.id.search_city);
+        ScrollView searchScrollView = findViewById(R.id.scrollview_2);
+        ImageButton backButton = findViewById(R.id.back_button);
+        LinearLayout glasgow = findViewById(R.id.glasgow);
+        LinearLayout london = findViewById(R.id.london);
+        LinearLayout nyc = findViewById(R.id.nyc);
+        LinearLayout muscat = findViewById(R.id.muscat);
+        LinearLayout pl = findViewById(R.id.pl);
+        LinearLayout dhaka = findViewById(R.id.dhaka);
 
         // creating a list of cities
         cities = new ArrayList<>();
@@ -129,6 +138,73 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 animateButton(v);
+                searchScrollView.setVisibility(View.VISIBLE);
+                Window window = getWindow();
+                window.setStatusBarColor(getResources().getColor(R.color.white));
+
+            }
+        });
+
+        backButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                animateButton(v);
+                searchScrollView.setVisibility(View.GONE);
+            }
+        });
+
+        glasgow.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                animateButton(v);
+                searchScrollView.setVisibility(View.GONE);
+                selectedCityIndex = 0;
+                updateCityData();
+            }
+        });
+        london.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                animateButton(v);
+                searchScrollView.setVisibility(View.GONE);
+                selectedCityIndex = 1;
+                updateCityData();
+            }
+        });
+        nyc.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                animateButton(v);
+                searchScrollView.setVisibility(View.GONE);
+                selectedCityIndex = 2;
+                updateCityData();
+            }
+        });
+        muscat.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                animateButton(v);
+                searchScrollView.setVisibility(View.GONE);
+                selectedCityIndex = 3;
+                updateCityData();
+            }
+        });
+        pl.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                animateButton(v);
+                searchScrollView.setVisibility(View.GONE);
+                selectedCityIndex = 4;
+                updateCityData();
+            }
+        });
+        dhaka.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                animateButton(v);
+                searchScrollView.setVisibility(View.GONE);
+                selectedCityIndex = 5;
+                updateCityData();
             }
         });
 
@@ -297,12 +373,22 @@ public class MainActivity extends AppCompatActivity {
                 Date nextDayDate = new Date(nextDayTime);
                 String nextDayString = inputFormatter.format(nextDayDate);
 
+                // extract numeric value from the string
+                String numericValue = windSpeed.replaceAll("[^\\d.]", "");
+                double speedInMph = Double.parseDouble(numericValue);
+                // convert speed from mph to km/h
+                double speedInKmh = speedInMph * 1.60934;
+                // round off to two decimal places
+                DecimalFormat df = new DecimalFormat("#.##");
+                double roundedSpeedInKmh = Double.parseDouble(df.format(speedInKmh));
+                String overallWindSpeed = windSpeed + "/" + roundedSpeedInKmh + "km/h";
+
                 date.setText(nextDayString);
                 weatherDesc.setText(weatherCondition);
                 maxTemp.setText(maxTemperature);
                 minTemp.setText(minTemperature);
                 windDirectionValue.setText(windDirection);
-                windSpeedValue.setText(windSpeed);
+                windSpeedValue.setText(overallWindSpeed);
                 visibilityValue.setText(visibility);
                 pressureValue.setText(pressure);
                 humidityValue.setText(humidity);
@@ -374,6 +460,7 @@ public class MainActivity extends AppCompatActivity {
                                 // remove the °C from the string
                                 String temperatureString = temperature.replaceAll("[^0-9]", "");
                                 int temperatureInteger = Integer.parseInt(temperatureString);
+
                                 ScrollView scrollView = findViewById(R.id.scrollview_1);
 
                                 if (temperatureInteger <= 10) {
@@ -389,6 +476,12 @@ public class MainActivity extends AppCompatActivity {
                                     Window window = getWindow();
                                     window.setStatusBarColor(getResources().getColor(R.color.warm));
                                 }
+                                int fahrenheit = (int) Math.ceil((double) (temperatureInteger * 9) / 5) + 32;
+                                String fahrenheitString = "/" + fahrenheit + "°F";
+                                TextView textFahrenheit = findViewById(R.id.text_fahrenheit);
+                                textFahrenheit.setText(fahrenheitString);
+
+
                             } else {
                                 Toast.makeText(MainActivity.this, "Failed to fetch data!", Toast.LENGTH_LONG).show();
                             }
@@ -593,7 +686,6 @@ public class MainActivity extends AppCompatActivity {
 
         return drawable;
     }
-
 
 
     // class representing a city

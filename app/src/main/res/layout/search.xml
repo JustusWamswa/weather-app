@@ -1,17 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/scrollview_1"
+    android:id="@+id/scrollview_2"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#e3e3e1"
     android:scrollbars="none"
-    android:visibility="visible"
+    android:visibility="gone"
     android:paddingHorizontal="30dp">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="10dp"
+            android:paddingTop="3dp"
+            android:layout_alignParentEnd="true"
+            android:text="S2038641"
+            android:textColor="@color/black"
+            android:textSize="11sp" />
 
         <ImageButton
             android:id="@+id/back_button"
@@ -22,7 +32,7 @@
             android:background="@null"
             android:clickable="true"
             android:contentDescription="Back button"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="15dp"
             android:scaleType="fitCenter"
             android:src="@drawable/back" />
 
