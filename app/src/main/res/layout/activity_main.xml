@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--    //-->
+<!--    // Name                 ________ Justus Wamswa Chemirmir-->
+<!--    // Student ID           ________ S2038641-->
+<!--    // Programme of Study   ________ BSc (Hons) Computing-->
+<!--    //-->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/scrollview_1"

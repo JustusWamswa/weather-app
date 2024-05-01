@@ -1,9 +1,18 @@
+//
+// Name                 ________ Justus Wamswa Chemirmir
+// Student ID           ________ S2038641
+// Programme of Study   ________ BSc (Hons) Computing
+//
+
 package com.example.chemirmir_justus_s2038641;
 
-import android.content.Context;
+import static com.example.chemirmir_justus_s2038641.ExtractorUtil.extractCoordinates;
+import static com.example.chemirmir_justus_s2038641.ExtractorUtil.extractDateTime;
+import static com.example.chemirmir_justus_s2038641.ExtractorUtil.extractTemperatureFromData;
+import static com.example.chemirmir_justus_s2038641.ExtractorUtil.extractValueByKey;
+import static com.example.chemirmir_justus_s2038641.ExtractorUtil.extractWeatherCondition;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -17,15 +26,10 @@ import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.content.res.AppCompatResources;
-import androidx.core.graphics.drawable.DrawableCompat;
-
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -52,6 +56,11 @@ public class MainActivity extends AppCompatActivity {
         Objects.requireNonNull(getSupportActionBar()).hide();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        if (!NetworkUtil.isNetworkAvailable(this)) {
+            // show a Toast message indicating no internet connection
+            Toast.makeText(this, "No internet connection", Toast.LENGTH_LONG).show();
+        }
 
         ImageButton prevButton = findViewById(R.id.prev_button);
         ImageButton nextButton = findViewById(R.id.next_button);
@@ -563,99 +572,7 @@ public class MainActivity extends AppCompatActivity {
         }).start();
     }
 
-    // method to extract temperature value from the data string
-    private String extractTemperatureFromData(String data) {
-        // find the index of "°C"
-        int endIndex = data.indexOf("°C");
-        if (endIndex != -1) {
-            // find the index of the last space before "°C"
-            int startIndex = data.lastIndexOf(" ", endIndex);
-            if (startIndex != -1 && startIndex < endIndex) {
-                // extract the substring containing temperature
-                return data.substring(startIndex + 1, endIndex + 2);
-            }
-        }
-        // return "N/A" if temperature is not found
-        return "N/A";
-    }
 
-    // method to extract weather condition from the data string
-    private String extractWeatherCondition(String data) {
-        // find the index of the first colon
-        int colonIndex = data.indexOf(":");
-        // if colonIndex is -1, return an empty string
-        if (colonIndex == -1) {
-            return "";
-        }
-        // extract the substring after the colon
-        String condition = data.substring(colonIndex + 1).trim();
-        // split the string by comma and take the first part
-        String[] parts = condition.split(",");
-        if (parts.length > 0) {
-            // return the extracted weather condition
-            return parts[0].trim();
-        } else {
-            // return an empty string if the string cannot be split
-            return "";
-        }
-    }
-
-    // method to extract date and time from the data string
-    private String[] extractDateTime(String data) {
-        // split the string by spaces
-        String[] parts = data.split(" ");
-        if (parts.length >= 5) {
-            // combine the first four parts to get the date
-            String date = parts[0] + " " + parts[1] + " " + parts[2] + " " + parts[3];
-            // combine the fifth and sixth parts to get the time
-            String time = parts[4] + " " + parts[5];
-            // return date and time as an array
-            return new String[]{date, time};
-        } else {
-            // return empty strings if the string cannot be split
-            return new String[]{"", ""};
-        }
-    }
-
-    // method to extract weather element value from the data string
-    private String extractValueByKey(String data, String key) {
-        // split the string by commas
-        String[] parts = data.split(",");
-        // loop through the parts to find the key-value pair
-        for (String part : parts) {
-            // split the part by ":" to separate key and value
-            String[] keyValue = part.split(":");
-            // sunrise and sunset have different formatting
-            if (keyValue.length == 3 && keyValue[0].trim().equals(key)) {
-                return keyValue[1].trim() + ":" + keyValue[2].trim();
-            }
-            // if the key matches, return the value (trimmed)
-            if (keyValue.length == 2 && keyValue[0].trim().equals(key)) {
-                return keyValue[1].trim();
-            }
-        }
-        // if the key is not found, return "N/A"
-        return "N/A";
-    }
-
-    // method to extract coordinates from the data string
-    private String extractCoordinates(String coordinates) {
-        // split the string by space to separate latitude and longitude
-        String[] parts = coordinates.split(" ");
-        if (parts.length == 2) {
-            // extract latitude and longitude
-            String latitude = parts[0];
-            String longitude = parts[1];
-
-            // append degree symbol and direction to latitude and longitude
-            String formattedCoordinates = Math.abs(Double.parseDouble(latitude)) + "°" + (Double.parseDouble(latitude) < 0 ? "S, " : "N, ") +
-                    Math.abs(Double.parseDouble(longitude)) + "°" + (Double.parseDouble(longitude) < 0 ? "W" : "E");
-
-            return formattedCoordinates;
-        } else {
-            return "N/A";
-        }
-    }
 
 
     // Method to show loader
@@ -669,103 +586,4 @@ public class MainActivity extends AppCompatActivity {
         ProgressBar progressBar = findViewById(R.id.progress_bar);
         progressBar.setVisibility(View.GONE);
     }
-
-    // method to update vector color
-    private Drawable changeVectorDrawableColor(Context context, int drawableResId, int colorResId) {
-        // Retrieve the vector drawable
-        Drawable drawable = AppCompatResources.getDrawable(context, drawableResId);
-
-        // Wrap the drawable so that it can be tinted
-        drawable = DrawableCompat.wrap(drawable).mutate();
-
-        // Apply the color change
-        DrawableCompat.setTint(drawable, context.getResources().getColor(colorResId));
-
-        return drawable;
-    }
-
-
-    // class representing a city
-
-    private static class City {
-        private int position;
-        private int id;
-        private String name;
-        private String country;
-
-        public City(int position, int id, String name, String country) {
-            this.position = position;
-            this.id = id;
-            this.name = name;
-            this.country = country;
-        }
-
-        public int getPosition() {
-            return position;
-        }
-
-        public int getId() {
-            return id;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public String getCountry() {
-            return country;
-        }
-    }
-
-    // class representing weather forecast
-    private static class Forecast {
-        private int day;
-        private String title;
-        private String description;
-        private String pubDate;
-        private String geoLocation;
-
-        public Forecast(int day, String title, String description, String pubDate, String geoLocation) {
-            this.day = day;
-            this.title = title;
-            this.description = description;
-            this.pubDate = pubDate;
-            this.geoLocation = geoLocation;
-        }
-
-        public int getDay() {
-            return day;
-        }
-
-        public String getTitle() {
-            return title;
-        }
-
-        public String getDescription() {
-            return description;
-        }
-
-        public String getPubDate() {
-            return pubDate;
-        }
-
-        public String getGeoLocation() {
-            return geoLocation;
-        }
-
-    }
-
-    // class representing latest weather
-    private static class Latest {
-        private String description;
-
-        public Latest(String description) {
-            this.description = description;
-        }
-
-        public String getDescription() {
-            return description;
-        }
-    }
-
 }

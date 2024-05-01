@@ -1,5 +1,11 @@
 package com.example.chemirmir_justus_s2038641;
 
+//
+// Name                 ________ Justus Wamswa Chemirmir
+// Student ID           ________ S2038641
+// Programme of Study   ________ BSc (Hons) Computing
+//
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
