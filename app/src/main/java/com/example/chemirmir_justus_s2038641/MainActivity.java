@@ -139,9 +139,6 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 animateButton(v);
                 searchScrollView.setVisibility(View.VISIBLE);
-                Window window = getWindow();
-                window.setStatusBarColor(getResources().getColor(R.color.white));
-
             }
         });
 
